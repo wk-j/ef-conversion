@@ -25,10 +25,6 @@ namespace BoolToString {
             builder.Entity<Student>().Property(x => x.Height).HasConversion(new BoolToStringConverter("OFF", "ON"));
             builder.Entity<Student>().Property(x => x.Fast).HasConversion(new BoolToTwoValuesConverter<int>(0, 1));
         }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder builder) {
-
-        }
     }
 
     class Program {
@@ -46,7 +42,21 @@ namespace BoolToString {
                 context.Students.Add(new Student { Height = true, Fast = true });
                 context.Students.Add(new Student { Height = false, Fast = false });
                 context.SaveChanges();
+
+                var students = context.Students;
+                foreach (var item in students) {
+                    Console.WriteLine("{0} {1}", item.Height, item.Fast);
+                }
             }
+
+            var c = new BoolToStringConverter("OFF", "ON");
+            var exp = c.ConvertFromProviderExpression.Compile();
+
+            var f = exp("OFF");
+            var t = exp("ON");
+
+            Console.WriteLine(f == false);
+            Console.WriteLine(t);
         }
     }
 }
